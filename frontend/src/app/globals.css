@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
 :root {
+  /* Light mode colors */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
+
+  /* Primary colors - Deep blue for focus and trust */
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+
+  /* Secondary colors - Warm green for completion/success */
+  --secondary: #16a34a;
+  --secondary-foreground: #ffffff;
+
+  /* Accent colors - Soft purple for creativity */
+  --accent: #7c3aed;
+  --accent-foreground: #ffffff;
+
+  /* Destructive colors */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  /* Ring color for focus states */
+  --ring: #2563eb;
+
+  /* Radius for rounded corners */
+  --radius: 0.5rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  /* Dark mode colors */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --input: #1e293b;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+
+  /* Primary colors adjusted for dark mode */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  /* Secondary colors adjusted for dark mode */
+  --secondary: #22c55e;
+  --secondary-foreground: #ffffff;
+
+  /* Accent colors adjusted for dark mode */
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
+
+  /* Destructive colors for dark mode */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Ring color for dark mode */
+  --ring: #3b82f6;
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
