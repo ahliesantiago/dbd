@@ -16,7 +16,6 @@ export interface ApiResponse<T = any> {
 export interface User {
   id: number;
   name: string;
-  alias?: string;
   email?: string;
   hasAuthentication: boolean;
   createdAt: Date;
@@ -25,7 +24,6 @@ export interface User {
 
 export interface UserCreateInput {
   name: string;
-  alias?: string;
   email?: string;
   password?: string;
 }

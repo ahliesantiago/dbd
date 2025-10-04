@@ -1,3 +1,5 @@
+import type { User, UserCreateInput, AuthResponse } from '@shared/types/types'
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
 export class ApiError extends Error {
@@ -69,4 +71,47 @@ async function apiRequest<T>(
 
     throw new ApiError(errorMessage, 0)
   }
+}
+
+export const userApi = {
+  // Check if any user exists (for first-time setup detection)
+  async checkUserExists(): Promise<{ exists: boolean; user?: Omit<User, 'id' | 'createdAt' | 'updatedAt'> }> {
+    return apiRequest('/api/auth/user/exists')
+  },
+
+  // Create a new user (first-time setup)
+  async createUser(userData: UserCreateInput): Promise<AuthResponse> {
+    return apiRequest('/api/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    })
+  },
+
+  // Get current user information
+  async getCurrentUser(): Promise<{ user?: Omit<User, 'id' | 'createdAt' | 'updatedAt'> }> {
+    return apiRequest('/api/auth/me')
+  },
+
+  // Update user information
+  async updateUser(updates: Partial<UserCreateInput>): Promise<AuthResponse> {
+    return apiRequest('/api/auth/update', {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    })
+  },
+
+  // Authenticate user (if authentication is enabled)
+  async authenticate(email: string, password: string): Promise<AuthResponse> {
+    return apiRequest('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    })
+  },
+
+  // Logout user
+  async logout(): Promise<void> {
+    return apiRequest('/api/auth/logout', {
+      method: 'POST',
+    })
+  },
 }

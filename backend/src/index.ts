@@ -7,6 +7,7 @@ import connectPgSimple from 'connect-pg-simple';
 import dotenv from 'dotenv';
 import pool, { testConnection } from './config/database';
 import { initDatabase } from './utils/initDatabase';
+import authRoutes from './routes/auth';
 
 // Load environment variables
 dotenv.config();
@@ -62,6 +63,14 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// API routes placeholder
+app.get('/api', (req, res) => {
+  res.json({ message: 'DBD API v1.0' });
+});
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {

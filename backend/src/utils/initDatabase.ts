@@ -7,7 +7,6 @@ export const initDatabase = async (): Promise<void> => {
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        alias VARCHAR(255),
         email VARCHAR(255) UNIQUE,
         password_hash VARCHAR(255),
         has_authentication BOOLEAN DEFAULT FALSE,

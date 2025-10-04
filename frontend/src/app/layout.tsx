@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { UserProvider } from "@/contexts/user-context";
 
 export const metadata: Metadata = {
   title: "DBD",
@@ -19,7 +20,9 @@ export default function RootLayout({
           defaultTheme="system"
           storageKey="dbd-ui-theme"
         >
-          {children}
+          <UserProvider>
+            {children}
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>
