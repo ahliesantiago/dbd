@@ -6,6 +6,7 @@ import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import dotenv from 'dotenv';
 import pool, { testConnection } from './config/database';
+import { initDatabase } from './utils/initDatabase';
 
 // Load environment variables
 dotenv.config();
@@ -98,6 +99,9 @@ const startServer = async () => {
       console.log('\n🔧 For development, you can also run the backend without database connectivity (limited functionality)');
       process.exit(1);
     }
+
+    // Initialize database tables
+    await initDatabase();
 
     // Start the server
     app.listen(PORT, () => {
