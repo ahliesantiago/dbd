@@ -1,3 +1,17 @@
+export interface AuthResponse {
+  success: boolean;
+  user?: Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+  token?: string;
+  message?: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
 // User types
 export interface User {
   id: number;
@@ -7,6 +21,13 @@ export interface User {
   hasAuthentication: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UserCreateInput {
+  name: string;
+  alias?: string;
+  email?: string;
+  password?: string;
 }
 
 export type BlockType = 'Tasks' | 'Habits' | 'Events' | 'Appointments';
