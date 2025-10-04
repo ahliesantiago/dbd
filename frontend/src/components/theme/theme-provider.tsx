@@ -13,14 +13,25 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  resolvedTheme: 'dark' | 'light'
 }
 
 const initialState: ThemeProviderState = {
   theme: 'system',
   setTheme: () => null,
+  resolvedTheme: 'light',
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+
+function getSystemTheme(): 'dark' | 'light' {
+  if (typeof window === 'undefined') return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function resolveTheme(theme: Theme): 'dark' | 'light' {
+  return theme === 'system' ? getSystemTheme() : theme
+}
 
 export function ThemeProvider({
   children,
@@ -29,39 +40,83 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [mounted, setMounted] = useState(false)
 
+  // Get the resolved theme, ensuring consistent SSR/client rendering
+  const resolvedTheme = useMemo(() => {
+    if (!mounted) {
+      // During SSR, always return light to match the CSS default
+      return 'light'
+    }
+    return resolveTheme(theme)
+  }, [theme, mounted])
+
+  // Initialize after mounting to avoid hydration issues
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme
-    if (stored) {
-      setTheme(stored)
+    setMounted(true)
+
+    // Get theme from localStorage
+    try {
+      const stored = localStorage.getItem(storageKey) as Theme
+      if (stored) {
+        setTheme(stored)
+      }
+    } catch {
+      // Handle localStorage errors gracefully
     }
   }, [storageKey])
 
+  // Apply theme classes after mounting (CSS @media handles initial system preference)
   useEffect(() => {
-    const root = window.document.documentElement
+    if (!mounted) return
 
-    root.classList.remove('light', 'dark')
+    const html = document.documentElement
+    const actualTheme = resolveTheme(theme)
 
+    // Only add explicit theme classes when user has made a choice
+    // This allows CSS @media to handle system preference naturally
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light'
-
-      root.classList.add(systemTheme)
-      return
+      // Remove explicit theme classes to let CSS @media take over
+      html.classList.remove('light', 'dark')
+    } else {
+      // Apply explicit user choice
+      html.classList.remove('light', 'dark')
+      html.classList.add(actualTheme)
     }
 
-    root.classList.add(theme)
-  }, [theme])
+    html.style.colorScheme = actualTheme
+  }, [theme, mounted])
+
+  // Listen for system theme changes when using system theme
+  useEffect(() => {
+    if (!mounted || theme !== 'system') return
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = () => {
+      // When on system theme, let CSS handle the colors but update colorScheme
+      const html = document.documentElement
+      const newTheme = mediaQuery.matches ? 'dark' : 'light'
+      html.style.colorScheme = newTheme
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [theme, mounted])
+
+  const updateTheme = useMemo(() => (newTheme: Theme) => {
+    try {
+      localStorage.setItem(storageKey, newTheme)
+    } catch {
+      // Handle localStorage errors gracefully
+    }
+    setTheme(newTheme)
+  }, [storageKey])
 
   const value = useMemo(() => ({
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
-  }), [theme, storageKey])
+    resolvedTheme,
+    setTheme: updateTheme,
+  }), [theme, resolvedTheme, updateTheme])
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

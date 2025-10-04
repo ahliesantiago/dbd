@@ -71,8 +71,9 @@ export function Sidebar({ className }: SidebarProps) {
       "flex h-full w-64 flex-col border-r border-border bg-card",
       className
     )}>
-      <div className="flex h-16 items-center border-b border-border px-6">
+      <div className="flex justify-between h-16 items-center border-b border-border ps-6 pe-4">
         <h1 className="text-xl font-bold text-foreground">DBD</h1>
+        <ThemeToggle />
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
@@ -98,11 +99,6 @@ export function Sidebar({ className }: SidebarProps) {
           )
         })}
       </nav>
-
-      {/* Theme Toggle */}
-      <div className="border-t border-border p-4">
-        <ThemeToggle />
-      </div>
     </div>
   )
 }

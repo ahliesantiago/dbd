@@ -36,6 +36,42 @@
   --radius: 0.5rem;
 }
 
+/* Automatically apply dark theme based on system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    /* Dark mode colors */
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --input: #1e293b;
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+    --popover: #1e293b;
+    --popover-foreground: #f1f5f9;
+
+    /* Primary colors adjusted for dark mode */
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+
+    /* Secondary colors adjusted for dark mode */
+    --secondary: #22c55e;
+    --secondary-foreground: #ffffff;
+
+    /* Accent colors adjusted for dark mode */
+    --accent: #8b5cf6;
+    --accent-foreground: #ffffff;
+
+    /* Destructive colors for dark mode */
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    /* Ring color for dark mode */
+    --ring: #3b82f6;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
