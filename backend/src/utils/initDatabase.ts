@@ -47,7 +47,7 @@ export const initDatabase = async (): Promise<void> => {
       CREATE TABLE IF NOT EXISTS blocks (
         id SERIAL PRIMARY KEY,
         title VARCHAR(500) NOT NULL,
-        type VARCHAR(50) NOT NULL CHECK (type IN ('Tasks', 'Habits', 'Events', 'Appointments')),
+        type VARCHAR(50) NOT NULL CHECK (type IN ('task', 'habit', 'event', 'appointment')),
         description TEXT,
         start_date DATE,
         end_date DATE,
@@ -56,7 +56,7 @@ export const initDatabase = async (): Promise<void> => {
         status VARCHAR(20) CHECK (status IN ('completed', 'skipped', 'postponed', 'cancelled')),
         tags TEXT[],
         categories TEXT[],
-        priority VARCHAR(10) NOT NULL DEFAULT 'None' CHECK (priority IN ('High', 'Medium', 'Low', 'None')),
+        priority VARCHAR(10) NOT NULL DEFAULT 'none' CHECK (priority IN ('high', 'medium', 'low', 'none')),
         recurrence VARCHAR(20) NOT NULL DEFAULT 'one-time' CHECK (recurrence IN ('one-time', 'daily', 'weekly', 'monthly', 'yearly', 'occasional', 'frequent')),
         completion_basis_unit VARCHAR(20) CHECK (completion_basis_unit IN ('simple', 'count', 'duration', 'distance', 'percent')),
         completion_basis_goal INTEGER,

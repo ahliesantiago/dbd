@@ -96,7 +96,7 @@ router.post('/', requireUser, async (req: express.Request, res: express.Response
     }
 
     // Validate block type
-    const validTypes = ['Tasks', 'Habits', 'Events', 'Appointments'];
+    const validTypes = ['task', 'habit', 'event', 'appointment'];
     if (!validTypes.includes(blockData.type)) {
       return res.status(400).json({
         success: false,
@@ -106,7 +106,7 @@ router.post('/', requireUser, async (req: express.Request, res: express.Response
 
     // Validate priority if provided
     if (blockData.priority) {
-      const validPriorities = ['High', 'Medium', 'Low', 'None'];
+      const validPriorities = ['high', 'medium', 'low', 'none'];
       if (!validPriorities.includes(blockData.priority)) {
         return res.status(400).json({
           success: false,
@@ -159,7 +159,7 @@ router.put('/:id', requireUser, async (req: express.Request, res: express.Respon
 
     // Validate data if provided
     if (updateData.type) {
-      const validTypes = ['Tasks', 'Habits', 'Events', 'Appointments'];
+      const validTypes = ['task', 'habit', 'event', 'appointment'];
       if (!validTypes.includes(updateData.type)) {
         return res.status(400).json({
           success: false,
@@ -169,7 +169,7 @@ router.put('/:id', requireUser, async (req: express.Request, res: express.Respon
     }
 
     if (updateData.priority) {
-      const validPriorities = ['High', 'Medium', 'Low', 'None'];
+      const validPriorities = ['high', 'medium', 'low', 'none'];
       if (!validPriorities.includes(updateData.priority)) {
         return res.status(400).json({
           success: false,

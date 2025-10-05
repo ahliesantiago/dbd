@@ -14,7 +14,7 @@ export class BlockService {
       endTime,
       tags = [],
       categories = [],
-      priority = 'None',
+      priority = 'none',
       recurrence = 'one-time',
       completionBasis
     } = blockData;

@@ -28,9 +28,9 @@ export interface UserCreateInput {
   password?: string;
 }
 
-export type BlockType = 'Tasks' | 'Habits' | 'Events' | 'Appointments';
+export type BlockType = 'task' | 'habit' | 'event' | 'appointment';
 
-export type Priority = 'High' | 'Medium' | 'Low' | 'None';
+export type Priority = 'high' | 'medium' | 'low' | 'none';
 
 export type RecurrenceType = 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'occasional' | 'frequent';
 
