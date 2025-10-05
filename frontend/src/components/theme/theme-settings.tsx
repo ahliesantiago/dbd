@@ -20,8 +20,7 @@ export function ThemeSettings({ className }: ThemeSettingsProps) {
 
   return (
     <div className={cn('space-y-3', className)}>
-      <h3 className="text-sm font-medium">Theme</h3>
-      <div className="flex items-center gap-1 rounded-lg border border-border p-1">
+      <div className="flex items-center justify-center gap-1 rounded-lg border border-border p-1">
         {themes.map(({ value, icon: Icon, label }) => (
           <button
             key={value}
