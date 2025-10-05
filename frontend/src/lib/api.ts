@@ -1,4 +1,4 @@
-import type { User, UserCreateInput, AuthResponse } from '@shared/types/types'
+import type { User, UserCreateInput, AuthResponse, Block, BlockCreateInput, ApiResponse } from '@shared/types/types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
@@ -112,6 +112,41 @@ export const userApi = {
   async logout(): Promise<void> {
     return apiRequest('/api/auth/logout', {
       method: 'POST',
+    })
+  },
+}
+
+export const blocksApi = {
+  // Get all blocks for the current user
+  async getBlocks(limit = 50, offset = 0): Promise<ApiResponse<Block[]>> {
+    return apiRequest(`/api/blocks?limit=${limit}&offset=${offset}`)
+  },
+
+  // Get a specific block by ID
+  async getBlock(id: number): Promise<ApiResponse<Block>> {
+    return apiRequest(`/api/blocks/${id}`)
+  },
+
+  // Create a new block
+  async createBlock(blockData: BlockCreateInput): Promise<ApiResponse<Block>> {
+    return apiRequest('/api/blocks', {
+      method: 'POST',
+      body: JSON.stringify(blockData),
+    })
+  },
+
+  // Update a block
+  async updateBlock(id: number, updates: Partial<BlockCreateInput & { status: any }>): Promise<ApiResponse<Block>> {
+    return apiRequest(`/api/blocks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    })
+  },
+
+  // Delete a block
+  async deleteBlock(id: number): Promise<ApiResponse<void>> {
+    return apiRequest(`/api/blocks/${id}`, {
+      method: 'DELETE',
     })
   },
 }

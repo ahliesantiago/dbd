@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import pool, { testConnection } from './config/database';
 import { initDatabase } from './utils/initDatabase';
 import authRoutes from './routes/auth';
+import blockRoutes from './routes/blocks';
 
 // Load environment variables
 dotenv.config();
@@ -71,6 +72,9 @@ app.get('/api', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Blocks routes
+app.use('/api/blocks', blockRoutes);
 
 // 404 handler
 app.use((req, res) => {
