@@ -12,16 +12,12 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, className }: AppLayoutProps) {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden pb-16 md:pb-0">
       {/* Desktop Sidebar */}
       <Sidebar className="hidden md:flex" />
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 overflow-auto",
-        "pb-16 md:pb-0", // Add bottom padding on mobile for bottom nav
-        className
-      )}>
+      <main className={cn("flex-1 overflow-auto", className)}>
         {children}
       </main>
 
