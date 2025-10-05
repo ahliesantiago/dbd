@@ -40,6 +40,42 @@ export const initDatabase = async (): Promise<void> => {
       }
     }
 
+    // TODO: Add foreign key constraint for type, tags, categories, and priority once customization is implemented
+    // TODO: Add more flexible options for recurrence and completion_basis_unit
+    // Create blocks table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS blocks (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(500) NOT NULL,
+        type VARCHAR(50) NOT NULL CHECK (type IN ('Tasks', 'Habits', 'Events', 'Appointments')),
+        description TEXT,
+        start_date DATE,
+        end_date DATE,
+        start_time TIME,
+        end_time TIME,
+        status VARCHAR(20) CHECK (status IN ('completed', 'skipped', 'postponed', 'cancelled')),
+        tags TEXT[],
+        categories TEXT[],
+        priority VARCHAR(10) NOT NULL DEFAULT 'None' CHECK (priority IN ('High', 'Medium', 'Low', 'None')),
+        recurrence VARCHAR(20) NOT NULL DEFAULT 'one-time' CHECK (recurrence IN ('one-time', 'daily', 'weekly', 'monthly', 'yearly', 'occasional', 'frequent')),
+        completion_basis_unit VARCHAR(20) CHECK (completion_basis_unit IN ('simple', 'count', 'duration', 'distance', 'percent')),
+        completion_basis_goal INTEGER,
+        completion_basis_goal_unit VARCHAR(50),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create indexes for blocks table
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS IDX_blocks_user_id ON blocks (user_id);
+      CREATE INDEX IF NOT EXISTS IDX_blocks_type ON blocks (type);
+      CREATE INDEX IF NOT EXISTS IDX_blocks_start_date ON blocks (start_date);
+      CREATE INDEX IF NOT EXISTS IDX_blocks_priority ON blocks (priority);
+      CREATE INDEX IF NOT EXISTS IDX_blocks_status ON blocks (status);
+    `);
+
     // Create indexes
     await pool.query(`
       CREATE INDEX IF NOT EXISTS IDX_session_expire

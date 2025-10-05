@@ -32,8 +32,17 @@ export type BlockType = 'Tasks' | 'Habits' | 'Events' | 'Appointments';
 
 export type Priority = 'High' | 'Medium' | 'Low' | 'None';
 
-export interface Block {
-  id: number;
+export type RecurrenceType = 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'occasional' | 'frequent';
+
+export type BlockStatus = 'completed' | 'skipped' | 'postponed' | 'cancelled' | null;
+
+export interface CompletionBasis {
+  unit: 'simple' | 'count' | 'duration' | 'distance' | 'percent';
+  goal?: number;
+  goalUnit?: string; // e.g., 'minutes', 'km', '%'
+}
+
+export interface BlockCreateInput {
   title: string;
   type: BlockType;
   description?: string;
@@ -41,12 +50,16 @@ export interface Block {
   endDate?: Date;
   startTime?: string;
   endTime?: string;
-  status: string | null;
   tags?: string[];
   categories?: string[];
   priority: Priority;
-  recurrence: string;
-  completionBasis?: string;
+  recurrence?: RecurrenceType;
+  completionBasis?: CompletionBasis;
+}
+
+export interface Block extends BlockCreateInput {
+  id: number;
+  status: BlockStatus;
   userId: number;
   createdAt: Date;
   updatedAt: Date;
