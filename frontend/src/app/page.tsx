@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import {
   Calendar,
@@ -8,7 +8,9 @@ import {
   Settings,
   Blocks,
   NotebookPen,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { AppWrapper } from '@/components/app-wrapper'
 import { useUser } from '@/contexts/user-context'
@@ -83,6 +85,7 @@ const dashboardStats = [
 
 export default function HomePage() {
   const { user } = useUser()
+  const [currentStatIndex, setCurrentStatIndex] = useState(0)
 
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours()
@@ -116,6 +119,38 @@ export default function HomePage() {
     }
   }
 
+  const nextStat = () => {
+    setCurrentStatIndex((prev) => (prev + 1) % dashboardStats.length)
+  }
+
+  const prevStat = () => {
+    setCurrentStatIndex((prev) => (prev - 1 + dashboardStats.length) % dashboardStats.length)
+  }
+
+  const handleTouchDrag = (e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    const startX = touch.clientX
+    const handleTouchMove = (e: TouchEvent) => {
+      const currentX = e.touches[0].clientX
+      const diff = startX - currentX
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          nextStat()
+        } else {
+          prevStat()
+        }
+        document.removeEventListener('touchmove', handleTouchMove)
+        document.removeEventListener('touchend', handleTouchEnd)
+      }
+    }
+    const handleTouchEnd = () => {
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
+  }
+
   return (
     <AppWrapper>
       <div className="flex flex-col h-full">
@@ -129,22 +164,79 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 p-6 space-y-6">
           {/* Quick Stats/Overview */}
-          <div className="grid grid-cols-3 gap-4">
-            {dashboardStats.map((stat) => (
-              <div key={stat.name} className="rounded-lg border border-border bg-card p-4">
-                <h3 className="font-semibold text-card-foreground mb-1">{stat.name}</h3>
-                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
+          <div className="relative">
+            {/* Desktop and tablet grid (sm and up) */}
+            <div className="hidden sm:grid grid-cols-3 gap-4">
+              {dashboardStats.map((stat) => (
+                <div key={stat.name} className="rounded-lg border border-border bg-card p-4">
+                  <h3 className="font-semibold text-card-foreground mb-1">{stat.name}</h3>
+                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile carousel (below sm) */}
+            <div className="sm:hidden">
+              <div className="relative overflow-hidden">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out touch-pan-x"
+                  style={{ transform: `translateX(-${currentStatIndex * 100}%)` }}
+                  onTouchStart={handleTouchDrag}
+                >
+                  {dashboardStats.map((stat, index) => (
+                    <div
+                      key={stat.name}
+                      className="w-full flex-shrink-0 px-2"
+                    >
+                      <div className="rounded-lg border border-border bg-card p-4">
+                        <h3 className="font-semibold text-card-foreground mb-1">{stat.name}</h3>
+                        <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                        <p className="text-xs text-muted-foreground">{stat.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Navigation arrows */}
+                <button
+                  onClick={prevStat}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-2 rounded-full bg-background border border-border shadow-lg hover:bg-accent transition-colors"
+                  aria-label="Previous stat"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={nextStat}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-2 rounded-full bg-background border border-border shadow-lg hover:bg-accent transition-colors"
+                  aria-label="Next stat"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
+                {/* Dots indicator */}
+                <div className="flex justify-center mt-4 space-x-2">
+                  {dashboardStats.map((stat, index) => (
+                    <button
+                      key={`dot-${stat.name}`}
+                      onClick={() => setCurrentStatIndex(index)}
+                      className={cn(
+                        "w-2 h-2 rounded-full transition-colors",
+                        index === currentStatIndex ? "bg-primary" : "bg-muted-foreground/30"
+                      )}
+                      aria-label={`Go to stat ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Navigation Grid */}
           <div>
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-6 gap-4">
               {dashboardNavigationItems.map((item) => {
                 const Icon = item.icon
                 return (
