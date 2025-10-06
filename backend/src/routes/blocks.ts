@@ -1,18 +1,45 @@
 import express from 'express';
 import { BlockService } from '../services/blockService';
+import { UserService } from '../services/userService';
 import { BlockCreateInput, ApiResponse, Block } from '../../../shared/types/types';
 
 const router: express.Router = express.Router();
 
-// Middleware to check if user exists in session
-const requireUser = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (!req.session?.userId) {
-    return res.status(401).json({
+// Middleware to check if user exists and handle authentication
+const requireUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    // Get the first user (single-user system)
+    const user = await UserService.getFirstUser();
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'No user found - please complete setup first'
+      } as ApiResponse);
+    }
+
+    // If user has authentication enabled, check session
+    if (user.hasAuthentication) {
+      if (!req.session?.userId || !req.session.authenticated) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        } as ApiResponse);
+      }
+    } else {
+      // User doesn't have authentication enabled, create/update session
+      req.session.userId = user.id;
+      req.session.authenticated = true;
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error in requireUser middleware:', error);
+    return res.status(500).json({
       success: false,
-      message: 'User not authenticated'
+      message: 'Authentication check failed'
     } as ApiResponse);
   }
-  next();
 };
 
 // GET /api/blocks - Get blocks for the current user

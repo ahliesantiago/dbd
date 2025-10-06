@@ -39,14 +39,35 @@ export function UserProvider({ children }: UserProviderProps) {
       setIsLoading(true)
       setError(null)
 
-      const response = await userApi.checkUserExists()
+      // First check if any user exists in the system
+      const existsResponse = await userApi.checkUserExists()
 
-      if (response.exists && response.user) {
-        setUser(response.user)
-        setIsFirstTime(false)
-      } else {
+      if (!existsResponse.exists) {
+        // No user exists, show first-time setup
         setUser(null)
         setIsFirstTime(true)
+        return
+      }
+
+      // User exists, now check if we have a valid session
+      try {
+        const currentUserResponse = await userApi.getCurrentUser()
+        if (currentUserResponse.user) {
+          setUser(currentUserResponse.user)
+          setIsFirstTime(false)
+        } else {
+          // User exists but no session (ideally shouldn't happen)
+          setUser(null)
+          setIsFirstTime(false)
+        }
+      } catch (authError) {
+        // If getCurrentUser fails and we know a user exists, it might indicate that session management isn't working properly
+        console.log('Session check failed, but user exists:', authError instanceof Error ? authError.message : 'Unknown error')
+
+        // For users without authentication, the backend should auto-establish session - if this fails, there might be a server issue
+        setUser(null)
+        setIsFirstTime(false)
+        setError('Authentication system error. Please refresh the page.')
       }
     } catch (err) {
       console.error('Failed to check user status:', err)
