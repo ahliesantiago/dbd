@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import dotenv from 'dotenv';
-import pool, { testConnection } from './config/database';
+import pool, { testConnection, createDatabaseIfNotExists } from './config/database';
 import { initDatabase } from './utils/initDatabase';
 import authRoutes from './routes/auth';
 import blockRoutes from './routes/blocks';
@@ -96,20 +96,38 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Start server
 const startServer = async () => {
   try {
+    // Try to create database if it doesn't exist
+    const dbCreated = await createDatabaseIfNotExists();
+    if (!dbCreated) {
+      console.error('❌ Failed to ensure database exists');
+      console.log('\n💡 Database Setup Issues:');
+      console.log('1. Make sure PostgreSQL is running');
+      console.log('2. Ensure all required environment variables are set in .env file');
+      console.log('3. Check your credentials can connect to the default postgres database');
+      console.log('4. Current config:');
+      console.log(`   - Host: ${process.env.DB_HOST || 'NOT SET'}`);
+      console.log(`   - Port: ${process.env.DB_PORT || 'NOT SET'}`);
+      console.log(`   - Database: ${process.env.DB_NAME || 'NOT SET'}`);
+      console.log(`   - User: ${process.env.DB_USER || 'NOT SET'}`);
+      console.log(`   - Password: ${process.env.DB_PASSWORD ? '[SET]' : 'NOT SET'}`);
+      console.log('\n🔧 Create a .env file in the backend directory with the above variables');
+      process.exit(1);
+    }
+
     // Test database connection
     const dbConnected = await testConnection();
     if (!dbConnected) {
-      console.error('❌ Failed to connect to database');
-      console.log('\n💡 Database Setup Required:');
-      console.log('1. Make sure PostgreSQL is running');
-      console.log('2. Create the database: CREATE DATABASE dbd_database;');
-      console.log('3. Check your .env.local file for correct credentials');
+      console.error('❌ Failed to connect to database after creation');
+      console.log('\n💡 Database Connection Issues:');
+      console.log('1. Database was created but connection failed');
+      console.log('2. This might be a permissions or configuration issue');
+      console.log('3. Verify all environment variables are correctly set');
       console.log('4. Current config:');
-      console.log(`   - Host: ${process.env.DB_HOST || 'localhost'}`);
-      console.log(`   - Port: ${process.env.DB_PORT || '5432'}`);
-      console.log(`   - Database: ${process.env.DB_NAME || 'dbd_database'}`);
-      console.log(`   - User: ${process.env.DB_USER || 'postgres'}`);
-      console.log('\n🔧 For development, you can also run the backend without database connectivity (limited functionality)');
+      console.log(`   - Host: ${process.env.DB_HOST || 'NOT SET'}`);
+      console.log(`   - Port: ${process.env.DB_PORT || 'NOT SET'}`);
+      console.log(`   - Database: ${process.env.DB_NAME || 'NOT SET'}`);
+      console.log(`   - User: ${process.env.DB_USER || 'NOT SET'}`);
+      console.log(`   - Password: ${process.env.DB_PASSWORD ? '[SET]' : 'NOT SET'}`);
       process.exit(1);
     }
 

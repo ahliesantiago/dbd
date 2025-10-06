@@ -30,7 +30,7 @@ export class UserService {
       // Insert user into database
       const query = `
         INSERT INTO users (name, email, password_hash, has_authentication)
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4)
         RETURNING id, name, email, has_authentication, created_at, updated_at
       `;
 
