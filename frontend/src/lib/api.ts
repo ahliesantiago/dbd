@@ -122,6 +122,13 @@ export const blocksApi = {
     return apiRequest(`/api/blocks?limit=${limit}&offset=${offset}`)
   },
 
+  // Get blocks by date range
+  async getBlocksByDateRange(startDate: Date, endDate: Date): Promise<ApiResponse<Block[]>> {
+    const start = startDate.toISOString().split('T')[0]
+    const end = endDate.toISOString().split('T')[0]
+    return apiRequest(`/api/blocks/date-range?startDate=${start}&endDate=${end}`)
+  },
+
   // Get a specific block by ID
   async getBlock(id: number): Promise<ApiResponse<Block>> {
     return apiRequest(`/api/blocks/${id}`)

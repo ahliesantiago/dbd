@@ -65,6 +65,39 @@ router.get('/', requireUser, async (req: express.Request, res: express.Response)
   }
 });
 
+// GET /api/blocks/date-range - Get blocks by date range
+router.get('/date-range', requireUser, async (req: express.Request, res: express.Response) => {
+  try {
+    const userId = req.session.userId!;
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'startDate and endDate query parameters are required'
+      } as ApiResponse);
+    }
+
+    const blocks = await BlockService.getBlocksByDateRange(
+      userId,
+      new Date(startDate as string),
+      new Date(endDate as string)
+    );
+
+    res.json({
+      success: true,
+      data: blocks
+    } as ApiResponse<Block[]>);
+  } catch (error: any) {
+    console.error('Error fetching blocks by date range:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch blocks by date range',
+      error: error.message
+    } as ApiResponse);
+  }
+});
+
 // GET /api/blocks/:id - Get a specific block
 router.get('/:id', requireUser, async (req: express.Request, res: express.Response) => {
   try {

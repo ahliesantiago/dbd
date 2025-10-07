@@ -79,6 +79,27 @@ export class BlockService {
     return this.mapDatabaseBlockToBlock(result.rows[0]);
   }
 
+  // Get blocks by date range
+  static async getBlocksByDateRange(
+    userId: number,
+    startDate: Date,
+    endDate: Date
+  ): Promise<Block[]> {
+    const query = `
+      SELECT * FROM blocks
+      WHERE user_id = $1
+      AND (
+        (start_date >= $2 AND start_date <= $3) OR
+        (end_date >= $2 AND end_date <= $3) OR
+        (start_date <= $2 AND end_date >= $3)
+      )
+      ORDER BY start_date ASC, start_time ASC
+    `;
+
+    const result = await pool.query(query, [userId, startDate, endDate]);
+    return result.rows.map(this.mapDatabaseBlockToBlock);
+  }
+
   // Update a block
   static async updateBlock(
     blockId: number,
