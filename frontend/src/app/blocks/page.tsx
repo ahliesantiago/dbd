@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, ListTodo } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Plus, ListTodo, ChevronRight } from 'lucide-react'
 import { AppWrapper } from '@/components/app-wrapper'
 import { Block, BlockCreateInput, BlockType, Priority, RecurrenceType } from '@shared/types/types'
 import { blocksApi } from '@/lib/api'
@@ -43,23 +43,17 @@ export default function BlocksPage() {
   const [creating, setCreating] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
-  // Close modal function
-  const closeModal = useCallback(() => {
-    setShowCreateForm(false)
-    setFormData(initialFormData)
-  }, [])
-
   // Handle Escape key press
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showCreateForm) {
-        closeModal()
+        setShowCreateForm(false)
       }
     }
 
     const handleClickOutside = (e: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        closeModal()
+        setShowCreateForm(false)
       }
     }
 
@@ -77,7 +71,7 @@ export default function BlocksPage() {
       document.removeEventListener('click', handleClickOutside)
       document.body.style.overflow = 'unset'
     }
-  }, [showCreateForm, closeModal])
+  }, [showCreateForm])
 
   // Load blocks on component mount
   useEffect(() => {
@@ -95,6 +89,38 @@ export default function BlocksPage() {
       setError(err instanceof Error ? err.message : 'Failed to load blocks')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleQuickAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleQuickAdd()
+  }
+
+  const handleQuickAdd = async () => {
+    if (!formData.title.trim()) return
+
+    try {
+      setCreating(true)
+
+      const blockData: BlockCreateInput = {
+        title: formData.title.trim(),
+        type: formData.type,
+        priority: 'none',
+        recurrence: 'one-time',
+      }
+
+      const response = await blocksApi.createBlock(blockData)
+
+      if (response.success && response.data) {
+        setBlocks(prev => [response.data!, ...prev])
+        setFormData(prev => ({ ...prev, title: '', type: 'task' }))
+      }
+    } catch (err) {
+      console.error('Error creating block:', err)
+      setError(err instanceof Error ? err.message : 'Failed to create block')
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -122,7 +148,8 @@ export default function BlocksPage() {
 
       if (response.success && response.data) {
         setBlocks(prev => [response.data!, ...prev])
-        closeModal()
+        setFormData(initialFormData)
+        setShowCreateForm(false)
       }
     } catch (err) {
       console.error('Error creating block:', err)
@@ -160,24 +187,47 @@ export default function BlocksPage() {
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="border-b border-border bg-card px-6 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Blocks
-              </h1>
-              <p className="text-muted-foreground">
-                Manage your tasks, habits, events, and appointments
-              </p>
-            </div>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create Block</span>
-            </button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Blocks
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your tasks, habits, events, and appointments
+            </p>
           </div>
         </div>
+
+        <form onSubmit={handleQuickAddSubmit} className='flex items-center justify-between mx-4 my-2 border border-border rounded-lg'>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            placeholder="Add block"
+            className='flex-1 px-4 py-2 focus:outline-none bg-transparent'
+            disabled={creating}
+          />
+          <div className="flex items-center">
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as BlockType }))}
+              className="p-2 text-sm border-none focus:outline-none mr-1"
+              disabled={creating}
+            >
+              <option value="task">Task</option>
+              <option value="habit">Habit</option>
+              <option value="event">Event</option>
+              <option value="appointment">Appointment</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(true)}
+              className="flex items-center justify-center p-2 mr-2 rounded-lg hover:bg-accent transition-colors"
+              aria-label="Open detailed form"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </form>
 
         {/* Content */}
         <div className="flex-1 p-6">
@@ -209,7 +259,7 @@ export default function BlocksPage() {
                   <h2 id="modal-title" className="text-xl font-semibold">Create New Block</h2>
                   <button
                     type="button"
-                    onClick={closeModal}
+                    onClick={() => setShowCreateForm(false)}
                     className="p-1 rounded-lg hover:bg-accent transition-colors"
                     aria-label="Close modal"
                   >
@@ -394,7 +444,7 @@ export default function BlocksPage() {
                   <div className="flex justify-end space-x-3">
                     <button
                       type="button"
-                      onClick={closeModal}
+                      onClick={() => setShowCreateForm(false)}
                       className="px-4 py-2 border border-border rounded-lg text-foreground hover:bg-accent transition-colors"
                     >
                       Cancel
